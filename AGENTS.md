@@ -55,6 +55,22 @@ Any image load failure (`onerror`) removes the `<img>` and reveals the colored f
 - **Everything in this repo is English only**: visible page text (`lang="en"` — title, description, category names, search placeholder, empty state, footer), README, and all source comments
 - Verify with a CJK scan over `dist/index.html` (see below)
 
+### Git commits (Conventional Commits)
+
+Follow the [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```
+<type>(<optional scope>): <subject>
+
+<optional body wrapped at 72 chars>
+```
+
+- Types: `feat` (new feature), `fix` (bug fix), `docs` (AGENTS.md / README), `style`, `refactor`, `chore` (tooling, deps, config) — default to `chore` when nothing fits
+- Subject: imperative mood ("add", not "added"), lowercase, no trailing period, ≤ 50 chars (hard limit 72)
+- Body: separated by a blank line; explain what/why, not how; bullet points are fine
+- Commit messages are English only, like everything else in this repo
+- Amend freely while a commit is local-only; never rewrite pushed history
+
 ### Styles & scripts
 
 - Styles are inline in `index.astro`; theming uses CSS variables; dark mode follows `prefers-color-scheme` (no manual toggle)
