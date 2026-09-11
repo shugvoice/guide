@@ -1,0 +1,114 @@
+{
+  "title": "Shug Guide",
+  "description": "A collection of my frequently used sites",
+  "categories": [
+    {
+      "name": "Favorites",
+      "icon": "🌟",
+      "links": [
+        {
+          "name": "GitHub",
+          "url": "https://github.com",
+          "description": "Code hosting & collaboration"
+        },
+        {
+          "name": "Google",
+          "url": "https://www.google.com",
+          "description": "Search engine"
+        },
+        {
+          "name": "YouTube",
+          "url": "https://www.youtube.com",
+          "description": "Video platform"
+        },
+        {
+          "name": "Wikipedia",
+          "url": "https://www.wikipedia.org",
+          "description": "The free encyclopedia"
+        },
+        {
+          "name": "Figma",
+          "url": "https://www.figma.com",
+          "description": "Online design tool",
+          "icon": "https://static.figma.com/app/icon/2/icon-128.png"
+        }
+      ]
+    },
+    {
+      "name": "Development",
+      "icon": "💻",
+      "links": [
+        {
+          "name": "Astro",
+          "url": "https://astro.build",
+          "description": "Content-driven web framework",
+          "icon": "https://astro.build/favicon.svg"
+        },
+        {
+          "name": "MDN Web Docs",
+          "url": "https://developer.mozilla.org",
+          "description": "Web technology documentation"
+        },
+        {
+          "name": "Stack Overflow",
+          "url": "https://stackoverflow.com",
+          "description": "Q&A community for programmers"
+        },
+        {
+          "name": "npm",
+          "url": "https://www.npmjs.com",
+          "description": "Node package registry"
+        },
+        {
+          "name": "Can I use",
+          "url": "https://caniuse.com",
+          "description": "Browser compatibility lookup",
+          "icon": "https://caniuse.com/img/favicon-128.png"
+        },
+        {
+          "name": "Regex101",
+          "url": "https://regex101.com",
+          "description": "Regex testing & debugging"
+        }
+      ]
+    },
+    {
+      "name": "Tools",
+      "icon": "🧰",
+      "links": [
+        {
+          "name": "TinyPNG",
+          "url": "https://tinypng.com",
+          "description": "Image compression",
+          "icon": "https://tinypng.com/images/favicon.ico"
+        },
+        {
+          "name": "Excalidraw",
+          "url": "https://excalidraw.com",
+          "description": "Hand-drawn style whiteboard"
+        },
+        {
+          "name": "DeepL",
+          "url": "https://www.deepl.com",
+          "description": "Machine translation"
+        },
+        {
+          "name": "iLoveIMG",
+          "url": "https://www.iloveimg.com",
+          "description": "Online image toolkit"
+        }
+      ]
+    },
+    {
+      "name": "Resources",
+      "icon": "📦",
+      "links": [
+        {
+          "name": "Aiven",
+          "url": "https://aiven.io",
+          "description": "Managed open source data services"
+        }
+      ]
+    }
+  ]
+}

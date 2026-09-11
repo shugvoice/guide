@@ -1,0 +1,455 @@
+---
+import { nav } from '../data/nav';
+import type { NavLink } from '../types';
+
+/** Whether the icon is an image URL (otherwise treated as emoji text) */
+function isImgUrl(icon: string): boolean {
+  return icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('/');
+}
+
+/** First character of the name (Array.from keeps CJK / surrogate pairs correct) */
+function firstChar(name: string): string {
+  return Array.from(name.trim())[0] ?? '#';
+}
+
+/** Stable hue derived from the name; the same name always gets the same color */
+function hue(name: string): number {
+  let h = 0;
+  for (const ch of name) {
+    h = (h * 31 + (ch.codePointAt(0) ?? 0)) % 360;
+  }
+  return h;
+}
+
+/** Derive the site favicon from the link URL (http/https only, no third-party services) */
+function faviconFor(url: string): string | undefined {
+  try {
+    const u = new URL(url);
+    return /^https?:$/.test(u.protocol) ? `${u.origin}/favicon.ico` : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Card avatar image source: an explicit image URL wins; otherwise auto-fetch the site favicon (emoji and load failure fall back to the first letter) */
+function avatarImgSrc(link: NavLink): string | undefined {
+  if (link.icon) return isImgUrl(link.icon) ? link.icon : undefined;
+  return faviconFor(link.url);
+}
+
+const total = nav.categories.reduce((n, c) => n + c.links.length, 0);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{nav.title}</title>
+    {nav.description && <meta name="description" content={nav.description} />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container">
+        <h1 class="title">{nav.title}</h1>
+        {nav.description && <p class="subtitle">{nav.description}</p>}
+        <div class="search-box">
+          <svg
+            class="search-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input id="search" type="search" placeholder="Search sites…" autocomplete="off" spellcheck="false" />
+          <kbd class="search-kbd" id="search-kbd">Ctrl K</kbd>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      {nav.categories.map((category) => (
+        <section class="category" data-category>
+          <h2 class="category-title">
+            {category.icon && <span class="category-icon">{category.icon}</span>}
+            <span>{category.name}</span>
+            <span class="count">{category.links.length}</span>
+          </h2>
+          <ul class="grid">
+            {category.links.map((link) => {
+              const imgSrc = avatarImgSrc(link);
+              return (
+                <li
+                  data-keywords={`${link.name} ${link.description ?? ''} ${category.name}`.toLowerCase()}
+                >
+                  <a class="card" href={link.url} target="_blank" rel="noopener noreferrer">
+                    <span class="avatar" style={`--h: ${hue(link.name)}`}>
+                      {link.icon && !isImgUrl(link.icon) ? (
+                        <span class="avatar-emoji">{link.icon}</span>
+                      ) : (
+                        <span class="avatar-char">{firstChar(link.name)}</span>
+                      )}
+                      {imgSrc && (
+                        <img
+                          class="avatar-img"
+                          src={imgSrc}
+                          alt=""
+                          width="40"
+                          height="40"
+                          loading="lazy"
+                          decoding="async"
+                          referrerpolicy="no-referrer"
+                          onerror="this.remove()"
+                        />
+                      )}
+                    </span>
+                    <span class="meta">
+                      <span class="name">{link.name}</span>
+                      {link.description && <span class="desc">{link.description}</span>}
+                    </span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+      <p class="empty" id="empty-tip" hidden>No sites match “<span id="empty-q"></span>”</p>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>
+          {total} sites{' '}·{' '}Powered by{' '}<a
+            href="https://astro.build"
+            target="_blank"
+            rel="noopener noreferrer">Astro</a
+          >
+        </p>
+      </div>
+    </footer>
+
+    <style is:global>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --text: #1c1f24;
+        --muted: #6b7280;
+        --card: #ffffff;
+        --border: #e5e7eb;
+        --accent: #4f6ef7;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #101216;
+          --text: #e8eaed;
+          --muted: #9aa0a6;
+          --card: #171a20;
+          --border: #272b34;
+        }
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          'PingFang SC',
+          'Hiragino Sans GB',
+          'Microsoft YaHei',
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .container {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      /* ---------- Header ---------- */
+      .header {
+        padding: 44px 0 12px;
+        text-align: center;
+      }
+      .title {
+        margin: 0 0 6px;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .subtitle {
+        margin: 0 0 22px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .search-box {
+        position: relative;
+        max-width: 420px;
+        margin: 0 auto;
+      }
+      .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted);
+        pointer-events: none;
+      }
+      input[type='search'] {
+        width: 100%;
+        padding: 10px 64px 10px 38px;
+        font-size: 14px;
+        font-family: inherit;
+        color: var(--text);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        outline: none;
+        transition:
+          border-color 0.15s ease,
+          box-shadow 0.15s ease;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      input[type='search']:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+      }
+      input[type='search']::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+      }
+      .search-kbd {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 1px 6px;
+        font-size: 11px;
+        font-family: inherit;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        pointer-events: none;
+      }
+
+      /* ---------- Categories ---------- */
+      .category {
+        margin: 30px 0;
+      }
+      .category-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 12px;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .category-icon {
+        font-size: 18px;
+        font-weight: 400;
+      }
+      .count {
+        padding: 0 8px;
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--muted);
+        background: color-mix(in srgb, var(--muted) 14%, transparent);
+        border-radius: 999px;
+      }
+
+      /* ---------- Cards ---------- */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 100%;
+        padding: 12px 14px;
+        color: inherit;
+        text-decoration: none;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        transition:
+          transform 0.15s ease,
+          border-color 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+        box-shadow: 0 4px 12px rgb(0 0 0 / 0.06);
+      }
+      .card:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      .avatar {
+        position: relative;
+        display: grid;
+        flex: none;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: hsl(var(--h) 70% 52% / 0.14);
+      }
+      .avatar-char {
+        font-size: 17px;
+        font-weight: 600;
+        color: hsl(var(--h) 55% 40%);
+      }
+      @media (prefers-color-scheme: dark) {
+        .avatar-char {
+          color: hsl(var(--h) 65% 62%);
+        }
+      }
+      .avatar-emoji {
+        font-size: 20px;
+      }
+      .avatar-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        object-fit: cover;
+      }
+
+      .meta {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+      .name {
+        font-size: 14px;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .desc {
+        font-size: 12px;
+        color: var(--muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* ---------- Empty state / Footer ---------- */
+      .empty {
+        margin: 0;
+        padding: 48px 0;
+        font-size: 14px;
+        color: var(--muted);
+        text-align: center;
+      }
+      .footer {
+        padding: 28px 0 40px;
+        font-size: 12px;
+        color: var(--muted);
+        text-align: center;
+      }
+      .footer p {
+        margin: 0;
+      }
+      .footer a {
+        color: inherit;
+      }
+
+      @media (max-width: 480px) {
+        .header {
+          padding-top: 32px;
+        }
+        .title {
+          font-size: 24px;
+        }
+        .search-kbd {
+          display: none;
+        }
+      }
+    </style>
+
+    <script>
+      const input = document.querySelector<HTMLInputElement>('input[type="search"]');
+      const items = Array.from(document.querySelectorAll<HTMLLIElement>('[data-keywords]'));
+      const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-category]'));
+      const emptyTip = document.getElementById('empty-tip');
+      const emptyQ = document.getElementById('empty-q');
+      const kbd = document.getElementById('search-kbd');
+
+      // Swap the hint to ⌘K on Mac
+      if (kbd && /mac|iphone|ipad/i.test(navigator.platform)) {
+        kbd.textContent = '⌘K';
+      }
+
+      function filter(): void {
+        const q = (input?.value ?? '').trim().toLowerCase();
+        let visible = 0;
+        for (const item of items) {
+          const matched = !q || (item.dataset.keywords ?? '').includes(q);
+          item.hidden = !matched;
+          if (matched) visible++;
+        }
+        for (const section of sections) {
+          section.hidden = !section.querySelector('[data-keywords]:not([hidden])');
+        }
+        if (emptyTip) emptyTip.hidden = visible > 0;
+        if (emptyQ) emptyQ.textContent = q;
+      }
+
+      input?.addEventListener('input', filter);
+
+      document.addEventListener('keydown', (e) => {
+        const inField = document.activeElement === input;
+        // Ctrl/⌘ + K or / focuses the search box
+        if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') || (e.key === '/' && !inField)) {
+          e.preventDefault();
+          input?.focus();
+          input?.select();
+        }
+        // Esc clears and leaves the field
+        if (e.key === 'Escape' && inField && input) {
+          input.value = '';
+          filter();
+          input.blur();
+        }
+      });
+    </script>
+  </body>
+</html>
