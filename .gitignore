@@ -2,9 +2,13 @@
 dist/
 # generated types
 .astro/
+worker-configuration.d.ts
 
 # dependencies
 node_modules/
+
+# wrangler local state
+.wrangler/
 
 # logs
 npm-debug.log*

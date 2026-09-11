@@ -2,5 +2,8 @@ packages:
   - "."
 allowBuilds:
   esbuild: true
+  workerd: false
 minimumReleaseAgeExclude:
   - '@rolldown/binding-openharmony-arm64@1.2.8'
+  - miniflare@5.20260910.0-alpha
+  - wrangler@4.131.0
